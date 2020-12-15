@@ -33,12 +33,12 @@ contract QPoolRewards is ReentrancyGuard {
 
     constructor(
         address _rewardsDistribution,
-        IERC20 _rewardsToken,
-        IERC20 _stakingToken,
+        address _rewardsToken,
+        address _stakingToken,
         uint256 _stakingDuration
     ) public {
-        rewardsToken = _rewardsToken;
-        stakingToken = _stakingToken;
+        rewardsToken = IERC20(_rewardsToken);
+        stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
         rewardsDuration = _stakingDuration * 1 days;
     }
