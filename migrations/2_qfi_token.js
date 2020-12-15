@@ -3,13 +3,13 @@ const QAirdrop = artifacts.require("QAirdrop.sol");
 const QStaking = artifacts.require("QPoolStakingFactory.sol");
 const web3 = require('web3');
 
-module.exports = function (deployer) {
+/*module.exports = function (deployer) {
   // Deploy ERC20 token first
   deployer.deploy(QFI).then(() => {
     // Deploy Airdrop contract with required parameters
       return deployer.deploy(
         QAirdrop,
-        web3.utils.toWei('400000', 'ether'),
+        web3.utils.toWei('150000', 'ether'),
         Math.round(new Date().getTime() / 1000) + 2592000,
         QFI.address)
   }).then(() => {
@@ -20,4 +20,14 @@ module.exports = function (deployer) {
       Math.round(new Date().getTime() / 1000) + 2592000
     )
   })
-};
+};*/
+
+module.exports = function(deployer) {
+  deployer.deploy(QFI).then(() => {
+    return deployer.deploy(
+      QStaking,
+      QFI.address,
+      Math.round(new Date().getTime() / 1000) + 120
+    )
+  })
+}
