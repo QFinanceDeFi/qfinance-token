@@ -48,7 +48,8 @@ contract QAirdrop {
     }
 
     function signUp() public returns (bool) {
-        require(now < closingTime, "Airdrop is closed.");
+        require(now < closingTime, "Airdrop is closed");
+        require(signees.length < 1001, "Airdrop is full");
         (bool _isSignee, ) = isSignee(msg.sender);
         if (!_isSignee) {
             addSignee(msg.sender);
@@ -61,7 +62,7 @@ contract QAirdrop {
     function claim() public {
         require(now > closingTime, "Airdrop is still open");
         (bool _isSignee, ) = isSignee(msg.sender);
-        require(_isSignee, "This address did not sign up for the airdrop");
+        require(_isSignee, "This address did not register");
         removeSignee(msg.sender);
         uint256 _airdropAmount = airdropToken.balanceOf(address(this)).div(signees.length);
         airdropToken.transfer(msg.sender, _airdropAmount);
