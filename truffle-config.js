@@ -26,7 +26,8 @@ module.exports = {
       port: 443,
       network_id: "*",
       from: address,
-      gas: 10000000
+      gas: 10000000,
+      gasPrice: 23000000000
     }
   },
 

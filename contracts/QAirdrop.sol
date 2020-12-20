@@ -16,11 +16,11 @@ contract QAirdrop {
     constructor (
         uint256 _totalAmount,
         uint _closingTime,
-        IERC20 _airdropToken
+        address _airdropToken
     ) public {
         totalAmount = _totalAmount;
         closingTime = _closingTime;
-        airdropToken = _airdropToken;
+        airdropToken = IERC20(_airdropToken);
     }
 
     function isSignee(address _address) public view returns (bool, uint256) {
