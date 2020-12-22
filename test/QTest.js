@@ -11,20 +11,28 @@ contract("QAirdrop", async accounts => {
 
         // Transfer QFI Tokens to the airdrop address
         // It should but doesn't have to match the total amount parameter
-        await qfi.transfer(airdrop.address, web3.utils.toWei('400000', 'ether'));
+        await qfi.transfer(airdrop.address, web3.utils.toWei('150000', 'ether'));
 
         // Check that transfer completed as desired
         let balance = await qfi.balanceOf(airdrop.address);
-        assert.equal(balance, web3.utils.toWei('400000', 'ether'));
+        assert.equal(balance, web3.utils.toWei('150000', 'ether'));
 
-        // Sign up for the airdrop using 2 separate accounts
         // Use non-minter accounts to ensure initial balance is 0
-        await airdrop.signUp.sendTransaction({from: accounts[1]});
-        await airdrop.signUp.sendTransaction({from: accounts[2]});
+        for (let i = 1; i < 101; i++) {
+            await airdrop.signUp.sendTransaction({from: accounts[i]})
+        }
+
+        // Check random address to ensure they are signed up
+        assert.equal(await airdrop.signeesMapping(accounts[1]), true)
+        assert.equal(await airdrop.signeesMapping(accounts[12]), true)
+        assert.equal(await airdrop.signeesMapping(accounts[33]), true)
+        assert.equal(await airdrop.signeesMapping(accounts[49]), true)
+        assert.equal(await airdrop.signeesMapping(accounts[71]), true)
+        assert.equal(await airdrop.signeesMapping(accounts[99]), true)
 
         // Check that the contract properly counted both signees
-        let signees = await airdrop.totalSignees.call();
-        assert.equal(signees, 2);
+        let signees = new web3.utils.BN(await airdrop.totalSignees.call()).toString();
+        assert.equal(signees, "100");
 
         // Sleep function to wait for the airdrop period to close
         function sleep(ms) {
@@ -34,14 +42,11 @@ contract("QAirdrop", async accounts => {
         // Need to set qfi token migration closing time value (2nd parameter) to 30s or edit value below
         await sleep(31000);
 
-        // Once airdrop period is closed, claim tokens and get balance of each account
-        await airdrop.claim.sendTransaction({from: accounts[1]});
-        await airdrop.claim.sendTransaction({from: accounts[2]});
-        let balanceOne = await qfi.balanceOf.call(accounts[1]);
-        let balanceTwo = await qfi.balanceOf.call(accounts[2]);
+        for (let i = 1; i < 101; i++) {
+            await airdrop.claim.sendTransaction({from: accounts[i]})
+            let balance = await qfi.balanceOf.call(accounts[i]);
+            assert(web3.utils.fromWei(balance, 'ether'), 1500)
+        }
 
-        // Since there are two addresses signed up, each should get half of initial amount
-        assert.equal(web3.utils.fromWei(balanceOne, 'ether'), 200000);
-        assert.equal(web3.utils.fromWei(balanceTwo, 'ether'), 200000);
     })
 })

@@ -57,9 +57,8 @@ contract QAirdrop {
     function claim() public {
         require(now > closingTime, "Airdrop is still open");
         require(signeesMapping[msg.sender], "You did not register - u r such a spiderbrain.");
-        
-        removeSignee(msg.sender);
         uint256 _airdropAmount = airdropToken.balanceOf(address(this)).div(totalSignees);
+        removeSignee(msg.sender);
         airdropToken.transfer(msg.sender, _airdropAmount);
     }
 }
