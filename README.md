@@ -27,7 +27,7 @@ _Note, the truffle-config file uses Infura so you will need to change the https 
 ### Run Tests
 1. Run the Ganache CLI first - we will run it by forking the Kovan Ethereum testnet so we can interact with it in its current state:
 ```bash
-ganache-cli -f [Infura/Alchemy address with project ID] -m "seed phrase" -i 42 -u [address 1]
+ganache-cli -f [Infura/Alchemy address with project ID] -m "seed phrase" -i 42 -u -a 101
 ```
 2. Run tests:
 ```bash
