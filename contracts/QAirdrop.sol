@@ -8,7 +8,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract QAirdrop {
     using SafeMath for uint256;
 
-    address[] private signees;
+    mapping(address => bool) public signeesMapping;
+    uint256 public totalSignees;
+
     uint256 public totalAmount;
     uint public closingTime;
     IERC20 airdropToken;
@@ -21,50 +23,42 @@ contract QAirdrop {
         totalAmount = _totalAmount;
         closingTime = _closingTime;
         airdropToken = IERC20(_airdropToken);
+        totalSignees = 0;
     }
 
-    function isSignee(address _address) public view returns (bool, uint256) {
-        for (uint256 i = 0; i < signees.length; i++) {
-            if (_address == signees[i]) return (true, i);
-        }
-        return (false, 0);
-    }
-
-    function totalSignees() public view returns (uint) {
-        return signees.length;
-    }
-
-    function addSignee(address _address) private {
-        (bool _isSignee, ) = isSignee(_address);
-        if(!_isSignee) signees.push(_address);
+    function addSignee(address _address) private {        
+        signeesMapping[_address] = true;
+        totalSignees += 1;
     }
 
     function removeSignee(address _address) private {
-        (bool _isSignee, uint256 i) = isSignee(_address);
-        if (_isSignee) {
-            signees[i] = signees[signees.length - 1];
-            signees.pop();
-        }
+        signeesMapping[_address] = false;
+        totalSignees -= 1;
     }
 
     function signUp() public returns (bool) {
         require(now < closingTime, "Airdrop is closed");
-        require(signees.length < 1001, "Airdrop is full");
-        (bool _isSignee, ) = isSignee(msg.sender);
-        if (!_isSignee) {
-            addSignee(msg.sender);
-            return true;
-        } else {
-            return false;
-        }
+        require(totalSignees < 1001, "Airdrop is full");
+        require(!signeesMapping[msg.sender], "You can't sign up twice frend.");
+        
+        addSignee(msg.sender);
+        return true;
+    }
+    
+    function unsignUp() public returns (bool) {
+        require(now < closingTime, "Airdrop is closed - can't unsign up now!");
+        require(totalSignees > 0, "Nobody is signed up yet so you can't be :P");
+        require(signeesMapping[msg.sender], "You aren't even signed up silly donut.");
+        
+        removeSignee(msg.sender);
+        return true;
     }
 
     function claim() public {
         require(now > closingTime, "Airdrop is still open");
-        (bool _isSignee, ) = isSignee(msg.sender);
-        require(_isSignee, "This address did not register");
+        require(signeesMapping[msg.sender], "You did not register - u r such a spiderbrain.");
+        uint256 _airdropAmount = airdropToken.balanceOf(address(this)).div(totalSignees);
         removeSignee(msg.sender);
-        uint256 _airdropAmount = airdropToken.balanceOf(address(this)).div(signees.length);
         airdropToken.transfer(msg.sender, _airdropAmount);
     }
 }
